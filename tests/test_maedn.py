@@ -1,4 +1,12 @@
-from maedn import HAUS, absolut, auf_bahn, fertig, neue_position, startzustand
+from maedn import (
+    HAUS,
+    absolut,
+    auf_bahn,
+    fertig,
+    figur_auf_feld,
+    neue_position,
+    startzustand,
+)
 
 
 def test_startzustand_offizielle_aufstellung():
@@ -62,3 +70,36 @@ def test_neue_position_von_der_bahn_ins_ziel():
 def test_neue_position_genau_auf_letztes_zielfeld():
     # Grenzfall: 40 + 3 = 43 ist gerade noch erlaubt
     assert neue_position(40, 3) == 43
+
+
+def leeres_brett():
+    """Alle Figuren im Haus – praktisch, um gezielt Situationen aufzubauen."""
+    return [[HAUS] * 4 for _ in range(4)]
+
+
+def test_figur_auf_feld_leeres_brett():
+    assert figur_auf_feld(leeres_brett(), 23) is None
+
+
+def test_figur_auf_feld_findet_figur():
+    pos = leeres_brett()
+    pos[2] = [3, HAUS, HAUS, HAUS]        # Gelb auf relativ 3 = absolut 23
+    assert figur_auf_feld(pos, 23) == (2, 0)
+
+
+def test_figur_auf_feld_ueber_den_ring():
+    pos = leeres_brett()
+    pos[3] = [HAUS, HAUS, 15, HAUS]       # Grün, Figur 2, auf relativ 15 = absolut 5
+    assert figur_auf_feld(pos, 5) == (3, 2)
+
+
+def test_figur_im_ziel_steht_nicht_auf_der_bahn():
+    pos = leeres_brett()
+    pos[1] = [40, 41, HAUS, HAUS]         # Blau im Ziel
+    assert figur_auf_feld(pos, 10) is None
+    assert figur_auf_feld(pos, 11) is None
+
+
+def test_figur_auf_feld_mit_zwei_spielern():
+    pos = startzustand(n_spieler=2)       # nur Rot und Blau
+    assert figur_auf_feld(pos, 10) == (1, 0)   # Blau auf seinem Startfeld

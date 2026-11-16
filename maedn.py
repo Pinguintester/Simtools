@@ -60,3 +60,12 @@ def neue_position(position: int, wurf: int) -> int | None:
     if nach > ZIEL_ENDE:
         return None
     return nach
+
+
+def figur_auf_feld(pos: list[list[int]], feld: int) -> tuple[int, int] | None:
+    """Welche Figur steht auf diesem absoluten Bahnfeld? (spieler, figur) oder None."""
+    for spieler, figuren in enumerate(pos):
+        for figur, position in enumerate(figuren):
+            if auf_bahn(position) and absolut(spieler, position) == feld:
+                return (spieler, figur)
+    return None
