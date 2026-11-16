@@ -11,7 +11,6 @@ from dataclasses import dataclass
 
 import numpy as np
 
-
 HAUS = -1
 SPIELER = 4
 FIGUREN_ANZAHL = 4
@@ -20,6 +19,7 @@ ZIEL_START = BAHN_LAENGE
 ZIEL_ENDE = BAHN_LAENGE + FIGUREN_ANZAHL - 1
 ABSTAND_STARTFELDER = 10
 RAUSKOMMEN = 6
+ZUSATZWURF = 6
 
 
 @dataclass(frozen=True)
@@ -110,3 +110,44 @@ def wuerfeln(rng: np.random.Generator) -> int:
     """Ein fairer Würfelwurf (1–6)."""
     return int(rng.integers(1, 7))
 
+
+def erster_zug(zuege: list[Zug], rng: np.random.Generator) -> Zug:
+    """Platzhalter-Strategie: nimmt einfach den ersten legalen Zug."""
+    return zuege[0]
+
+
+def anzahl_versuche(pos: list[list[int]], spieler: int) -> int:
+    """3 Versuche, wenn keine Figur auf der Bahn steht, sonst 1."""
+    if any(auf_bahn(position) for position in pos[spieler]):
+        return 1
+    return 3
+
+
+def spielerzug(pos: list[list[int]], spieler: int, strategie: callable, rng: np.random.Generator) -> None:
+    """Ein Spieler ist am Zug: würfeln, ziehen, bei 6 nochmal, ggf. 3 Versuche."""
+    versuche = anzahl_versuche(pos, spieler)
+    while versuche > 0:
+        wurf = wuerfeln(rng)
+        zuege = legale_zuege(pos, spieler, wurf)
+        if zuege:
+            zug = strategie(zuege, rng)
+            zug_ausfuehren(pos, spieler, zug)
+            if fertig(pos, spieler):
+                return
+        if wurf == ZUSATZWURF:
+            versuche = anzahl_versuche(pos, spieler)
+            continue
+        if zuege:
+            return
+        versuche -= 1
+
+
+def spiele(strategien: list, seed: int) -> int:
+    """Spielt ein ganzes Spiel und gibt die Nummer des Siegers zurück."""
+    rng = np.random.default_rng(seed)
+    pos = startzustand(len(strategien))
+    while True:
+        for spieler, strategie in enumerate(strategien):
+            spielerzug(pos, spieler, strategie, rng)
+            if fertig(pos, spieler):
+                return spieler
