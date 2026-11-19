@@ -111,9 +111,30 @@ def wuerfeln(rng: np.random.Generator) -> int:
     return int(rng.integers(1, 7))
 
 
-def erster_zug(zuege: list[Zug], rng: np.random.Generator) -> Zug:
+def strategie_erster_zug(zuege: list[Zug], rng: np.random.Generator) -> Zug:
     """Platzhalter-Strategie: nimmt einfach den ersten legalen Zug."""
     return zuege[0]
+
+
+def strategie_zufall(zuege: list[Zug], rng: np.random.Generator) -> Zug:
+    """Zufallsstrategie: wählt einen zufälligen legalen Zug."""
+    return rng.choice(zuege)
+
+
+def strategie_laeufer(zuege: list[Zug], rng: np.random.Generator) -> Zug:
+    """Läuferstrategie: wählt den Zug mit der vordersten Figur."""
+    return max(zuege, key=lambda zug: zug.von)
+
+
+def strategie_nachzuegler(zuege: list[Zug], rng: np.random.Generator) -> Zug:
+    """Nachzüglerstrategie: wählt den Zug mit der hintersten Figur."""
+    return min(zuege, key=lambda zug: zug.von)
+
+
+#def strategie_schlaeger(zuege: list[Zug], rng: np.random.Generator) -> Zug:
+#    """#Schlägerstrategie: Schlägt, wenn möglich. Stonst Läufer"""
+#    if
+#    return 
 
 
 def anzahl_versuche(pos: list[list[int]], spieler: int) -> int:
@@ -151,3 +172,5 @@ def spiele(strategien: list, seed: int) -> int:
             spielerzug(pos, spieler, strategie, rng)
             if fertig(pos, spieler):
                 return spieler
+
+print(spiele([strategie_erster_zug] * 4, seed=4))
